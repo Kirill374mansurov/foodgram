@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe
+from backend.foodgram_backend.food.models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe
 
 
 User = get_user_model()
