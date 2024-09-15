@@ -4,10 +4,12 @@ from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from backend.foodgram_backend.food.models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe
+from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe
 
 
 User = get_user_model()
+
+
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
@@ -38,7 +40,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientsSerializer(many=True)
     image = Base64ImageField()
     author = serializers.SlugRelatedField(
-        slug_field='username'
+        slug_field='username',
+        read_only='True'
     )
 
     class Meta:

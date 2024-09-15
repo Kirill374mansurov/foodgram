@@ -2,11 +2,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-ea19ygo%4k5*i+d$$4v*30o#$1=g00&_40027-!bexw_@)zcj*'
+SECRET_KEY = 'django-insecure-2q5e!*mqucgxu93m%4#y3zaeym8x87-^&!(cn3if1@5ocy3!r#'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -18,11 +18,9 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
 
     'rest_framework',
-    'food.apps.FoodConfig',
-
 ]
 
-AUTH_USER_MODEL = 'food.User'
+AUTH_USER_MODEL = 'api.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -34,7 +32,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'foodgram_backend.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -52,7 +50,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
