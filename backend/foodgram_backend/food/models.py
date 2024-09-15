@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -25,10 +24,8 @@ class User(AbstractUser):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32, verbose_name='Название')
-    slug = models.SlugField(
-        max_length=32, unique=True, verbose_name='Слаг', null=True
-    )
+    name = models.CharField(max_length=64, verbose_name='Название')
+    slug = models.SlugField(unique=True, verbose_name='Слаг')
 
     class Meta(AbstractUser.Meta):
         ordering = ['name']
@@ -42,7 +39,7 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=128, verbose_name='Название')
     measurement_unit = models.CharField(
-        max_length=64,
+        max_length=32,
         verbose_name='Единицы измерения'
     )
 
@@ -77,18 +74,16 @@ class Recipe(models.Model):
         default=False,
         verbose_name='В списке покупок'
     )
-    name = models.CharField(max_length=256, verbose_name='Название')
+    name = models.CharField(max_length=128, verbose_name='Название')
     image = models.ImageField(
         upload_to='food/images/',
         null=True,
         default=None,
         verbose_name='Изображение'
     )
-    text = models.TextField(verbose_name='Описание')
+    text = models.CharField(max_length=256, verbose_name='Описание')
     cooking_time = models.IntegerField(
-        verbose_name='Время приготовление в мин', validators=[
-            MinValueValidator(1),
-        ]
+        verbose_name='Время приготовление в мин'
     )
 
     class Meta(AbstractUser.Meta):
