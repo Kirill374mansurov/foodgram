@@ -2,8 +2,13 @@ from rest_framework import viewsets
 
 from rest_framework import mixins
 
-from .models import Ingredient, IngredientsRecipe, Recipe, Tag, TagRecipe
-from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer
+from .models import Ingredient, IngredientsRecipe, Recipe, Tag, TagRecipe, User
+from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer, UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 class RetrieveListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,

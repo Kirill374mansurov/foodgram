@@ -4,10 +4,21 @@ from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe
+from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe, User
 
 
-User = get_user_model()
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'avatar'
+        )
 
 
 class Base64ImageField(serializers.ImageField):
@@ -48,5 +59,25 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
+            'is_in_shopping_card', 'name', 'image', 'text', 'cooking_time',
         )
+
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        for ingredient in ingredients:
+            current_ingredient, status = Ingredient.objects.get_or_create(
+                **ingredient
+            )
+            IngredientsRecipe.objects.create(
+                ingredient=current_ingredient, recipe=recipe
+            )
+        for tag in tags:
+            current_tag, status = Tag.objects.get_or_create(
+                **tag
+            )
+            TagRecipe.objects.create(
+                tag=current_tag, recipe=recipe
+            )
+        return recipe

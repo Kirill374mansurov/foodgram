@@ -3,11 +3,38 @@ from django.db import models
 
 
 class User(AbstractUser):
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = (
+        'username',
+        'first_name',
+        'last_name'
+    )
+    username = models.CharField(
+        verbose_name='',
+        max_length=150,
+        unique=True,
+        error_messages={
+            'unique': 'Имя занято!',
+        }
+    )
+    first_name = models.CharField(
+        verbose_name='Имя', max_length=150
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия', max_length=150
+    )
+    email = models.EmailField(
+        verbose_name='Электронная почта',
+        unique=True,
+        error_messages={
+            'unique': 'Почта занята!',
+        }
+    )
     avatar = models.ImageField(
-        upload_to='food/images/',
         null=True,
-        default=None,
-        verbose_name='Аватарка'
+        blank=True,
+        verbose_name='Аватар'
     )
     is_subscribed = models.BooleanField(
         default=False,
