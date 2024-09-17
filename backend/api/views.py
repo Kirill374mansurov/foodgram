@@ -1,12 +1,12 @@
 from rest_framework import viewsets
-
 from rest_framework import mixins
+from djoser import views
 
 from .models import Ingredient, IngredientsRecipe, Recipe, Tag, TagRecipe, User
 from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer, UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(views.UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
