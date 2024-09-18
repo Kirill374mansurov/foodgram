@@ -8,7 +8,7 @@ from api.views import IngredientViewSet, RecipeViewSet, TagViewSet, UserViewSet
 
 
 router = routers.DefaultRouter()
-# router.register(r'recipes', RecipeViewSet)
+router.register(r'recipes', RecipeViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'ingredients', IngredientViewSet)
 router.register(r'users', UserViewSet)
