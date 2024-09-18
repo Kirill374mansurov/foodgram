@@ -1,7 +1,7 @@
 from djoser import views
+from django_filters.rest_framework import DjangoFilterBackend
 from requests import Response
-from rest_framework import viewsets, status
-from rest_framework import mixins
+from rest_framework import filters, viewsets, mixins, status
 from rest_framework.decorators import action, permission_classes, api_view
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
@@ -48,12 +48,16 @@ class RetrieveListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 class TagViewSet(RetrieveListViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(RetrieveListViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
-
+    pagination_class = None
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
+    filterset_fields = ('name',)
+    search_fields = ('^name',)
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()

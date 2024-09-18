@@ -54,8 +54,8 @@ class User(AbstractUser):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=64, verbose_name='Название')
-    slug = models.SlugField(unique=True, verbose_name='Слаг')
+    name = models.CharField(max_length=32, verbose_name='Название')
+    slug = models.SlugField(verbose_name='Слаг', null=True, max_length=32)
 
     class Meta(AbstractUser.Meta):
         ordering = ['name']
@@ -69,7 +69,7 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=128, verbose_name='Название')
     measurement_unit = models.CharField(
-        max_length=32,
+        max_length=64,
         verbose_name='Единицы измерения'
     )
 
@@ -125,16 +125,16 @@ class Recipe(models.Model):
         return self.name
 
 class TagRecipe(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='Тег')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'
 
 
 class IngredientsRecipe(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиенты')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
     amount = models.IntegerField(verbose_name='Количество')
 
     def __str__(self):

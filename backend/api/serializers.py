@@ -62,6 +62,9 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_in_shopping_card', 'name', 'image', 'text', 'cooking_time',
         )
 
+    def save(self, **kwargs):
+        pass
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
