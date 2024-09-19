@@ -45,10 +45,19 @@ class IngredientsSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
+class IngredientsRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects)
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = IngredientsRecipe
+        fields = ('id', 'amount')
+
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)
-    ingredients = IngredientsSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects)
+    ingredients = IngredientsRecipeSerializer(many=True)
+
     image = Base64ImageField()
     author = serializers.SlugRelatedField(
         slug_field='username',
@@ -62,25 +71,16 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_in_shopping_card', 'name', 'image', 'text', 'cooking_time',
         )
 
-    def save(self, **kwargs):
-        pass
-
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         for ingredient in ingredients:
-            current_ingredient, status = Ingredient.objects.get_or_create(
-                **ingredient
-            )
             IngredientsRecipe.objects.create(
-                ingredient=current_ingredient, recipe=recipe
+                ingredient=ingredient['id'], recipe=recipe, amount=ingredient['amount']
             )
         for tag in tags:
-            current_tag, status = Tag.objects.get_or_create(
-                **tag
-            )
             TagRecipe.objects.create(
-                tag=current_tag, recipe=recipe
+                tag=tag, recipe=recipe
             )
         return recipe
