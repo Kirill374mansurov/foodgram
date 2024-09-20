@@ -128,14 +128,8 @@ class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='Тег')
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
 
-    def __str__(self):
-        return self.tag
-
 
 class IngredientsRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиенты')
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
     amount = models.IntegerField(verbose_name='Количество')
-
-    def __str__(self):
-        return self.ingredient
