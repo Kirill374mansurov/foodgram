@@ -59,9 +59,15 @@ class IngredientViewSet(RetrieveListViewSet):
     filterset_fields = ('name',)
     search_fields = ('^name',)
 
+
 class RecipeViewSet(viewsets.ModelViewSet):
+    # queryset = Recipe.objects.prefetch_related(
+    #     'author', 'tags', 'ingredients').all()
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('author', 'is_favorited', 'is_in_shopping_cart', 'tags__slug')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

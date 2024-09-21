@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.urls import reverse
 
 
 class User(AbstractUser):
@@ -100,7 +101,7 @@ class Recipe(models.Model):
         default=False,
         verbose_name='В избранном'
     )
-    is_in_shopping_card = models.BooleanField(
+    is_in_shopping_cart = models.BooleanField(
         default=False,
         verbose_name='В списке покупок'
     )
@@ -123,6 +124,10 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('recipe-detail', kwargs={'recipe_id': self.pk})
+
 
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='Тег')
