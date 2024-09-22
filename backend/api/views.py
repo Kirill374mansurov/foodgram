@@ -4,11 +4,11 @@ from requests import Response
 from rest_framework import filters, viewsets, mixins, status
 from rest_framework.decorators import action, permission_classes, api_view
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly,
-                                        SAFE_METHODS)
 
+
+from .filters import RecipeFilter
 from .models import Ingredient, IngredientsRecipe, Recipe, Tag, TagRecipe, User
+from .permissions import OwnerOrReadOnly, ReadOnly
 from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer, UserSerializer
 
 
@@ -16,6 +16,7 @@ class UserViewSet(views.UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = (ReadOnly,)
     # filter_backends = [filters.SearchFilter]
     # search_fields = ['$username']
     # lookup_field = 'username'
@@ -55,19 +56,20 @@ class IngredientViewSet(RetrieveListViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     pagination_class = None
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
-    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    # queryset = Recipe.objects.prefetch_related(
-    #     'author', 'tags', 'ingredients').all()
     queryset = Recipe.objects.all()
+    permission_classes = (OwnerOrReadOnly,)
     serializer_class = RecipeSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('author', 'is_favorited', 'is_in_shopping_cart', 'tags__slug')
+    filterset_class = RecipeFilter
+    filterset_fields = (
+        'is_favorited', 'is_in_shopping_cart'
+    )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
