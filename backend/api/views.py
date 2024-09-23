@@ -3,8 +3,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from requests import Response
 from rest_framework import filters, viewsets, mixins, status
 from rest_framework.decorators import action, permission_classes, api_view
-from rest_framework.pagination import LimitOffsetPagination
-
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 
 from .filters import RecipeFilter
 from .models import Ingredient, IngredientsRecipe, Recipe, Tag, TagRecipe, User
@@ -15,30 +15,18 @@ from .serializers import TagSerializer, IngredientsSerializer, RecipeSerializer,
 class UserViewSet(views.UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
     permission_classes = (ReadOnly,)
-    # filter_backends = [filters.SearchFilter]
-    # search_fields = ['$username']
-    # lookup_field = 'username'
-    # http_method_names = ['get', 'post', 'patch', 'delete']
 
-    # @action(detail=False, methods=['get'],
-    #         permission_classes=[IsAuthenticated])
-    # def me(self, request):
-    #     serializer = self.get_serializer(request.user)
-    #     print(serializer.data)
-    #     return Response(serializer.data)
+    @action(['get',], detail=False, url_path='me/avatar', permission_classes=(IsAuthenticated,))
+    def me(self, request, *args, **kwargs):
+        self.get_object = self.get_instance
+        return self.retrieve(request, *args, **kwargs)
 
-    # @me.mapping.patch
-    # def patch_me(self, request):
-    #     serializer = self.get_serializer(
-    #         instance=request.user,
-    #         data=request.data,
-    #         partial=True
-    #     )
-    #     serializer.is_valid(raise_exceprion=True)
-    #     serializer.save(role=request.user.role)
-    #     return Response(serializer.data)
+    @me.mapping.put
+    def avatar(self, request):
+        self.get_object = self.get_instance
+        return self.update(request)
 
 
 class RetrieveListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,

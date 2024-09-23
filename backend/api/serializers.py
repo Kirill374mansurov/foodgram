@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'avatar'
         )
+        lookup_field = 'username'
 
 
 class Base64ImageField(serializers.ImageField):
