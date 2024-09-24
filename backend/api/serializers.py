@@ -3,7 +3,7 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe, User, Favorite, Subscription
+from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe, User, Favorite, Subscription, ShoppingCart
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         lookup_field = 'username'
 
     def get_is_subscribed(self, obj):
-        current_user = self.context.get('request').user
+        current_user = self.context.get('request').user.id
         return Subscription.objects.filter(author=obj, subscriber=current_user).exists()
 
 
@@ -64,7 +64,7 @@ class IngredientsRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class RecipeLimitedSerializer(serializers.ModelSerializer):
+class RecipeSmallSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
@@ -83,7 +83,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only='True'
     )
     is_favorited = serializers.SerializerMethodField()
-    # is_in_shopping_cart = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -152,5 +152,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def get_is_favorited(self, obj):
-        current_user = self.context['request'].user
+        current_user = self.context['request'].user.id
         return Favorite.objects.filter(recipe=obj, user=current_user).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        current_user = self.context['request'].user.id
+        return ShoppingCart.objects.filter(recipe=obj, user=current_user).exists()
