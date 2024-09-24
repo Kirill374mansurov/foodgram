@@ -54,6 +54,33 @@ class User(AbstractUser):
         return self.username
 
 
+class Subscription(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+        related_name='subscription'
+    )
+    subscriber = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Подписчик',
+        related_name='subscriber'
+    )
+
+    class Meta:
+        verbose_name = 'подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'subscriber'], name='unique_author_subscriber'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.author}: {self.subscriber}'
+
+
 class Tag(models.Model):
     name = models.CharField(max_length=32, verbose_name='Название')
     slug = models.SlugField(verbose_name='Слаг', null=True, max_length=32)
@@ -118,6 +145,7 @@ class Recipe(models.Model):
     )
 
     class Meta(AbstractUser.Meta):
+        default_related_name = 'recipes'
         ordering = ['name']
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
@@ -133,8 +161,52 @@ class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='Тег')
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
 
+    class Meta:
+        ordering = ['recipe', 'tag']
+        verbose_name = 'тег рецепта'
+        verbose_name_plural = 'Теги рецептов'
+        constraints = [
+            models.UniqueConstraint(fields=['tag', 'recipe'],
+                                    name='unique_tag_recipe')
+        ]
+
+    def __str__(self):
+        return f'{self.recipe}: {self.tag}'
+
 
 class IngredientsRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиенты')
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
     amount = models.IntegerField(verbose_name='Количество')
+
+    class Meta:
+        ordering = ['recipe', 'ingredient']
+        verbose_name = 'ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'ingredient'],
+                                    name='unique_ingredient_recipe')
+        ]
+
+    def __str__(self):
+        return f'{self.recipe}: {self.ingredient}'
+
+
+class Favorite(models.Model):
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='favorite')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='favorite')
+
+    class Meta:
+        ordering = ['recipe', 'user']
+        verbose_name = 'избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique_user_favorite_recipe')
+        ]
+
+    def __str__(self):
+        return f'{self.user}: {self.recipe}'

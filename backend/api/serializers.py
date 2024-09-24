@@ -3,10 +3,11 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe, User
+from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe, User, Favorite, Subscription
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -20,6 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
             'avatar'
         )
         lookup_field = 'username'
+
+    def get_is_subscribed(self, obj):
+        current_user = self.context.get('request').user
+        return Subscription.objects.filter(author=obj, subscriber=current_user).exists()
 
 
 class Base64ImageField(serializers.ImageField):
@@ -59,6 +64,13 @@ class IngredientsRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
+class RecipeLimitedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientsRecipeSerializer(
@@ -70,7 +82,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         read_only='True'
     )
-    # is_favorited = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
     # is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
@@ -138,3 +150,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 recipe=recipe
             )
         return recipe
+
+    def get_is_favorited(self, obj):
+        current_user = self.context['request'].user
+        return Favorite.objects.filter(recipe=obj, user=current_user).exists()
