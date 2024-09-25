@@ -2,10 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.urls import reverse
+from shortuuid.django_fields import ShortUUIDField
 
 
 class User(AbstractUser):
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
         'username',
@@ -73,7 +73,8 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'subscriber'], name='unique_author_subscriber'
+                fields=['author', 'subscriber'],
+                name='unique_author_subscriber'
             )
         ]
 
@@ -143,6 +144,11 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         verbose_name='Время приготовление в мин'
     )
+    short_link = ShortUUIDField(
+        length=4,
+        max_length=8,
+        prefix='http://127.0.0.1:8000/'
+    )
 
     class Meta(AbstractUser.Meta):
         default_related_name = 'recipes'
@@ -159,15 +165,18 @@ class Recipe(models.Model):
 
 class TagRecipe(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='Тег')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, verbose_name='рецепт'
+    )
 
     class Meta:
         ordering = ['recipe', 'tag']
         verbose_name = 'тег рецепта'
         verbose_name_plural = 'Теги рецептов'
         constraints = [
-            models.UniqueConstraint(fields=['tag', 'recipe'],
-                                    name='unique_tag_recipe')
+            models.UniqueConstraint(
+                fields=['tag', 'recipe'], name='unique_tag_recipe'
+            )
         ]
 
     def __str__(self):
@@ -175,8 +184,12 @@ class TagRecipe(models.Model):
 
 
 class IngredientsRecipe(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиенты')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, verbose_name='рецепт')
+    ingredient = models.ForeignKey(
+        Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиенты'
+    )
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, verbose_name='рецепт'
+    )
     amount = models.IntegerField(verbose_name='Количество')
 
     class Meta:
@@ -184,8 +197,10 @@ class IngredientsRecipe(models.Model):
         verbose_name = 'ингредиент рецепта'
         verbose_name_plural = 'Ингредиенты рецептов'
         constraints = [
-            models.UniqueConstraint(fields=['recipe', 'ingredient'],
-                                    name='unique_ingredient_recipe')
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_ingredient_recipe'
+            )
         ]
 
     def __str__(self):
@@ -204,8 +219,9 @@ class Favorite(models.Model):
         verbose_name = 'избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
-            models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_user_favorite_recipe')
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='unique_user_favorite_recipe'
+            )
         ]
 
     def __str__(self):

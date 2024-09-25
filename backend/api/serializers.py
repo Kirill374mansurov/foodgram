@@ -3,7 +3,8 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Tag, Recipe, Ingredient, TagRecipe, IngredientsRecipe, User, Favorite, Subscription, ShoppingCart
+from .models import (Favorite, Ingredient, IngredientsRecipe, Recipe,
+                     ShoppingCart, Subscription, TagRecipe, Tag, User)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,7 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         current_user = self.context.get('request').user.id
-        return Subscription.objects.filter(author=obj, subscriber=current_user).exists()
+        return Subscription.objects.filter(
+            author=obj, subscriber=current_user
+        ).exists()
 
 
 class Base64ImageField(serializers.ImageField):
@@ -32,7 +35,6 @@ class Base64ImageField(serializers.ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
@@ -89,7 +91,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
 
     def validate(self, data):
@@ -157,4 +159,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         current_user = self.context['request'].user.id
-        return ShoppingCart.objects.filter(recipe=obj, user=current_user).exists()
+        return ShoppingCart.objects.filter(
+            recipe=obj, user=current_user
+        ).exists()
+
+
+class SubscriptionSerializer(UserSerializer):
+    recipes_count = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count',)
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = Recipe.objects.filter(author=obj)
+        if limit:
+            recipes = recipes[:int(limit)]
+        return RecipeSmallSerializer(recipes, many=True).data
