@@ -19,7 +19,7 @@ class User(AbstractUser):
         error_messages={
             'unique': 'Имя занято!',
         },
-        validators=[UnicodeUsernameValidator(),]
+        validators=[UnicodeUsernameValidator()]
     )
     first_name = models.CharField(
         verbose_name='Имя', max_length=150
