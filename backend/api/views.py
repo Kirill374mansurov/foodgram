@@ -72,9 +72,9 @@ class UserViewSet(views.UserViewSet):
                 subscription = Subscription.objects.get(
                     author=author, subscriber=request.user
                 )
-            except LookupError:
+                subscription.delete()
+            except BaseException:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         if request.user == author:
@@ -174,9 +174,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         try:
             fav_recipe = Favorite.objects.get(recipe=recipe, user=request.user)
-        except LookupError:
+            fav_recipe.delete()
+        except BaseException:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        fav_recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -191,9 +191,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 fav_recipe = ShoppingCart.objects.get(
                     recipe=recipe, user=request.user
                 )
-            except LookupError:
+                fav_recipe.delete()
+            except BaseException:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            fav_recipe.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         recipe = get_object_or_404(Recipe, pk=pk)

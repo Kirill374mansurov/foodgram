@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.urls import reverse
 from shortuuid.django_fields import ShortUUIDField
+
+from backend import constants
 
 
 class User(AbstractUser):
@@ -14,7 +17,7 @@ class User(AbstractUser):
     )
     username = models.CharField(
         verbose_name='',
-        max_length=150,
+        max_length=constants.NAME_MAX_LENGHT,
         unique=True,
         error_messages={
             'unique': 'Имя занято!',
@@ -22,10 +25,10 @@ class User(AbstractUser):
         validators=[UnicodeUsernameValidator()]
     )
     first_name = models.CharField(
-        verbose_name='Имя', max_length=150
+        verbose_name='Имя', max_length=constants.NAME_MAX_LENGHT
     )
     last_name = models.CharField(
-        verbose_name='Фамилия', max_length=150
+        verbose_name='Фамилия', max_length=constants.NAME_MAX_LENGHT
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
@@ -33,7 +36,7 @@ class User(AbstractUser):
         error_messages={
             'unique': 'Почта занята!',
         },
-        max_length=254
+        max_length=constants.EMAIL_MAX_LENGHT
     )
     avatar = models.ImageField(
         null=True,
@@ -69,6 +72,7 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        ordering = ['author']
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
@@ -83,8 +87,12 @@ class Subscription(models.Model):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32, verbose_name='Название')
-    slug = models.SlugField(verbose_name='Слаг', null=True, max_length=32)
+    name = models.CharField(
+        max_length=constants.TAG_MAX_LENGHT, verbose_name='Название'
+    )
+    slug = models.SlugField(
+        verbose_name='Слаг', null=True, max_length=constants.TAG_MAX_LENGHT
+    )
 
     class Meta(AbstractUser.Meta):
         ordering = ['name']
@@ -96,9 +104,12 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=128, verbose_name='Название')
+    name = models.CharField(
+        max_length=constants.INGREDIENT_NAME_MAX_LENGHT,
+        verbose_name='Название'
+    )
     measurement_unit = models.CharField(
-        max_length=64,
+        max_length=constants.MEASUREMENT_UNIT_MAX_LENGHT,
         verbose_name='Единицы измерения'
     )
 
@@ -115,7 +126,8 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор'
+        verbose_name='Автор',
+        related_name='recipes'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -133,20 +145,28 @@ class Recipe(models.Model):
         default=False,
         verbose_name='В списке покупок'
     )
-    name = models.CharField(max_length=128, verbose_name='Название')
+    name = models.CharField(
+        max_length=constants.RECEPT_NAME_MAX_LENGHT, verbose_name='Название'
+    )
     image = models.ImageField(
         upload_to='images/',
         null=True,
         default=None,
         verbose_name='Изображение'
     )
-    text = models.CharField(max_length=256, verbose_name='Описание')
-    cooking_time = models.IntegerField(
-        verbose_name='Время приготовление в мин'
+    text = models.CharField(
+        max_length=constants.TEXT_MAX_LENGHT, verbose_name='Описание'
+    )
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name='Время приготовление в мин',
+        validators=[
+            MinValueValidator(constants.COOKING_TIME_MIN),
+            MaxValueValidator(constants.COOKING_TIME_MAX)
+        ]
     )
     short_link = ShortUUIDField(
-        length=4,
-        max_length=8,
+        length=constants.SHORT_LINK_LENGHT,
+        max_length=constants.SHORT_LINK_MAX_LENGHT,
         prefix='http://127.0.0.1:8000/'
     )
 
@@ -170,7 +190,7 @@ class TagRecipe(models.Model):
     )
 
     class Meta:
-        ordering = ['recipe', 'tag']
+        ordering = ['recipe']
         verbose_name = 'тег рецепта'
         verbose_name_plural = 'Теги рецептов'
         constraints = [
@@ -190,10 +210,16 @@ class IngredientsRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, verbose_name='рецепт'
     )
-    amount = models.IntegerField(verbose_name='Количество')
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        validators=[
+            MinValueValidator(constants.MIN_AMOUNT),
+            MaxValueValidator(constants.MAX_AMOUNT)
+        ]
+    )
 
     class Meta:
-        ordering = ['recipe', 'ingredient']
+        ordering = ['recipe']
         verbose_name = 'ингредиент рецепта'
         verbose_name_plural = 'Ингредиенты рецептов'
         constraints = [
@@ -209,13 +235,19 @@ class IngredientsRecipe(models.Model):
 
 class Favorite(models.Model):
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='favorite')
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Рецепт'
+    )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE,
-        related_name='favorite')
+        related_name='favorite',
+        verbose_name='Пользователь'
+    )
 
     class Meta:
-        ordering = ['recipe', 'user']
+        ordering = ['user']
         verbose_name = 'избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
@@ -230,13 +262,20 @@ class Favorite(models.Model):
 
 class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='shopping_cart'
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Рецепт'
     )
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='shopping_cart'
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Пользователь'
     )
 
     class Meta:
+        ordering = ['user']
         verbose_name = 'покупка списка'
         verbose_name_plural = 'Список покупок'
         constraints = [
