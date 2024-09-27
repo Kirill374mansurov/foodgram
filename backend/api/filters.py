@@ -15,9 +15,11 @@ class RecipeFilter(rest_framework.FilterSet):
         to_field_name='id'
     )
     is_favorited = rest_framework.filters.BooleanFilter(
-        field_name='is_favorited', method='filter_bool')
+        field_name='is_favorited', method='filter_bool'
+    )
     is_in_shopping_cart = rest_framework.filters.BooleanFilter(
-        field_name='is_in_shopping_cart', method='filter_bool')
+        field_name='is_in_shopping_cart', method='filter_bool'
+    )
 
     class Meta:
         model = Recipe
@@ -28,8 +30,10 @@ class RecipeFilter(rest_framework.FilterSet):
             return queryset
         if name == 'is_in_shopping_cart' and value:
             return queryset.filter(
-                shopping_cart__user=self.request.user)
+                shopping_cart__user=self.request.user
+            )
         if name == 'is_favorited' and value:
             return queryset.filter(
-                favorite__user=self.request.user)
+                favorite__user=self.request.user
+            )
         return queryset

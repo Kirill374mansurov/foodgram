@@ -1,11 +1,12 @@
 import base64
 
+import django.contrib.auth.models
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from backend import constants
-from .models import (Favorite, Ingredient, IngredientsRecipe, Recipe,
-                     ShoppingCart, Subscription, TagRecipe, Tag, User)
+from .models import (Ingredient, IngredientsRecipe, Recipe,
+                     TagRecipe, Tag, User)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -181,15 +182,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_favorited(self, obj):
-        request = self.context['request'].user.id
-        return Favorite.objects.filter(recipe=obj, user=request).exists()
-        # if request.data:
-        #     return request.user.favorite.filter(recipe=obj).exists()
-        # return False
+        request = self.context['request']
+        if not request.user.is_anonymous:
+            return request.user.favorite.filter(recipe=obj).exists()
+        return False
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context['request']
-        if request.data:
+        if not request.user.is_anonymous:
             return request.user.shopping_cart.filter(recipe=obj).exists()
         return False
 
@@ -213,7 +213,6 @@ class SubscriptionSerializer(UserSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
-        # recipes = Recipe.objects.filter(author=obj)
         recipes = request.user.recipes.filter(author=obj)
         if limit:
             recipes = recipes[:int(limit)]

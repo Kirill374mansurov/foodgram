@@ -132,9 +132,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    # filterset_fields = (
-    #     'is_favorited', 'is_in_shopping_cart'
-    # )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
