@@ -77,11 +77,12 @@ class UserViewSet(views.UserViewSet):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        if request.user == author:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
         self.serializer_class = SubscriptionSerializer
+        SubscriptionSerializer.validate(self, author, request.user)
+
         created = Subscription.objects.get_or_create(
             author=author, subscriber=request.user)
+
         if not created[-1]:
             return Response(
                 {'errors': 'Уже подписаны!'},
@@ -131,9 +132,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    filterset_fields = (
-        'is_favorited', 'is_in_shopping_cart'
-    )
+    # filterset_fields = (
+    #     'is_favorited', 'is_in_shopping_cart'
+    # )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
