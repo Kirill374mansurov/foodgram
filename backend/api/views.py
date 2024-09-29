@@ -133,9 +133,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
     @action(
         methods=['get'],
         detail=True,
@@ -171,7 +168,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         recipe = get_object_or_404(Recipe, pk=pk)
         try:
-            fav_recipe = Favorite.objects.get(recipe=recipe, user=request.user)
+            fav_recipe = Favorite.objects.get(
+                recipe=recipe, user=request.user
+            )
             fav_recipe.delete()
         except BaseException:
             return Response(status=status.HTTP_400_BAD_REQUEST)

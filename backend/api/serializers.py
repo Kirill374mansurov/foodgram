@@ -1,6 +1,5 @@
 import base64
 
-import django.contrib.auth.models
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
@@ -83,11 +82,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientsRecipeSerializer(
         source='ingredientsrecipe_set',
         many=True,
-        read_only=True
+        # read_only=True
     )
     image = Base64ImageField(use_url=True)
     author = UserSerializer(
-        read_only='True'
+        read_only=True
     )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -113,7 +112,9 @@ class RecipeSerializer(serializers.ModelSerializer):
                 f'Не заполнено поле ingredients'
             )
         ingredients = self.initial_data['ingredients']
-        data_ingredients = set(Ingredient.objects.values_list('id', flat=True))
+        data_ingredients = set(
+            Ingredient.objects.values_list('id', flat=True)
+        )
         ingredients_ids = set()
         tags = self.initial_data['tags']
         data_tags = set(Tag.objects.values_list('id', flat=True))
@@ -121,10 +122,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             if ingredient['id'] not in data_ingredients:
                 raise serializers.ValidationError(
                     'Несуществующий ингредиент!'
-                )
-            if not int(ingredient['amount']) > 0:
-                raise serializers.ValidationError(
-                    'Неверное количество!'
                 )
             if ingredient['id'] in ingredients_ids:
                 raise serializers.ValidationError(
@@ -149,8 +146,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients = self.initial_data.pop('ingredients')
         tags = self.initial_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-
+        recipe = Recipe.objects.create(
+            name=self.validated_data.get('name'),
+            image=self.validated_data.get('image'),
+            text=self.validated_data.get('text'),
+            cooking_time=self.validated_data.get('cooking_time'),
+            author_id=self.context['request'].user.id
+        )
         obj = (IngredientsRecipe(
             recipe=recipe, ingredient_id=ing['id'], amount=ing['amount']
         ) for ing in ingredients)
