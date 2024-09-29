@@ -105,11 +105,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if not self.initial_data.get('tags'):
             raise serializers.ValidationError(
-                f'Не заполнено поле tags'
+                'Не заполнено поле tags!'
             )
         if not self.initial_data.get('ingredients'):
             raise serializers.ValidationError(
-                f'Не заполнено поле ingredients'
+                'Не заполнено поле ingredients!'
             )
         ingredients = self.initial_data['ingredients']
         data_ingredients = set(
