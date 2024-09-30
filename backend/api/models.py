@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -167,7 +169,7 @@ class Recipe(models.Model):
     short_link = ShortUUIDField(
         length=constants.SHORT_LINK_LENGHT,
         max_length=constants.SHORT_LINK_MAX_LENGHT,
-        prefix='http://127.0.0.1:8000/'
+        prefix=os.getenv('ALLOWED_HOST')
     )
 
     class Meta(AbstractUser.Meta):
