@@ -1,13 +1,14 @@
 import csv
 
 from django.core.management.base import BaseCommand
-from api.models import Ingredient
+from api.models import Ingredient, Tag
 
 
 DIRECTORY = 'data/'
 
 NAMES_FILE = {
-    'ingredients.csv': "self.infredient(csv_reader)",
+    'ingredients.csv': "self.ingredient(csv_reader)",
+    'tags.csv': "self.tag(csv_reader)",
 }
 
 
@@ -19,10 +20,18 @@ class Command(BaseCommand):
 
     def ingredient(self, csv_reader):
         for row in csv_reader:
-            Ingredient.objects.create(
+            Ingredient.objects.get_or_create(
                 id=row['id'],
                 name=row['name'],
                 measurement_unit=row['measurement_unit']
+            )
+
+    def tag(self, csv_reader):
+        for row in csv_reader:
+            Tag.objects.get_or_create(
+                id=row['id'],
+                name=row['name'],
+                slug=row['slug']
             )
 
     def handle(self, *args, **kwargs):

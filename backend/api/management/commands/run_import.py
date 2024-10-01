@@ -2,7 +2,7 @@ from django.core import management
 from django.core.management.base import BaseCommand
 
 
-FILES = ['ingredients.csv',]
+FILES = ['ingredients.csv', 'tags.csv']
 
 
 class Command(BaseCommand):
