@@ -23,7 +23,7 @@ services:
       - static:/backend_static
       - media:/app/media/
     expose:
-      - 80
+      - 8000
 
   frontend:
     container_name: foodgram-front
@@ -36,7 +36,7 @@ services:
     container_name: foodgram-proxy
     image: kika374/foodgram_nginx
     ports:
-      - 80:80
+      - 8000:80
     depends_on:
       - backend
       - frontend
