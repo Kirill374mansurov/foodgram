@@ -5,7 +5,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from api.views import (IngredientViewSet, RecipeViewSet,
-                       TagViewSet, UserViewSet)
+                       TagViewSet, UserViewSet, redirect_recipe)
 
 
 router = routers.DefaultRouter()
@@ -17,6 +17,7 @@ router.register(r'users', UserViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('s/<str:short_id>/', redirect_recipe, name='redirect_recipe'),
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),
 ]

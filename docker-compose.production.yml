@@ -15,7 +15,7 @@ services:
 
   backend:
     container_name: foodgram-back
-    build: /backend
+    image: kika374/foodgram_backend
     env_file: .env
     depends_on:
       - db
@@ -27,14 +27,14 @@ services:
 
   frontend:
     container_name: foodgram-front
-    build: /frontend
+    image: kika374/foodgram_frontend
     env_file: .env
     volumes:
       - static:/app/build/
 
   nginx:
     container_name: foodgram-proxy
-    build: ./nginx/
+    image: kika374/foodgram_nginx
     ports:
       - 80:80
     depends_on:

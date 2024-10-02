@@ -1,10 +1,12 @@
 import base64
+import os
 from collections import defaultdict
 
 from djoser import views
 from django.core.files.base import ContentFile
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -231,3 +233,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'attachment; filename={0}'.format('shopping_list.txt')
         )
         return response
+
+
+def redirect_recipe(request, short_id):
+    short_link = os.getenv('ALLOWED_HOST') + short_id
+    recipe = get_object_or_404(Recipe, short_link=short_link)
+    return redirect(f'/recipes/{recipe.id}')
