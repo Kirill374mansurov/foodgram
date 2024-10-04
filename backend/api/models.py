@@ -96,7 +96,7 @@ class Tag(models.Model):
         verbose_name='Слаг', null=True, max_length=constants.TAG_MAX_LENGHT
     )
 
-    class Meta(AbstractUser.Meta):
+    class Meta:
         ordering = ['name']
         verbose_name = 'тег'
         verbose_name_plural = 'Теги'
@@ -115,7 +115,7 @@ class Ingredient(models.Model):
         verbose_name='Единицы измерения'
     )
 
-    class Meta(AbstractUser.Meta):
+    class Meta:
         ordering = ['name']
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
@@ -172,7 +172,7 @@ class Recipe(models.Model):
         prefix=os.getenv('ALLOWED_HOST')
     )
 
-    class Meta(AbstractUser.Meta):
+    class Meta:
         default_related_name = 'recipes'
         ordering = ['name']
         verbose_name = 'рецепт'
