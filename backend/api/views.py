@@ -122,6 +122,7 @@ class TagViewSet(RetrieveListViewSet):
 class IngredientViewSet(RetrieveListViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
+    pagination_class = None
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
 
